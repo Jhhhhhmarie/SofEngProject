@@ -1,0 +1,1065 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mister C Restaurant Ordering System</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink-50: #fdf0f5;
+    --pink-100: #fbd5e6;
+    --pink-200: #f5a8c8;
+    --pink-400: #e8739f;
+    --pink-600: #c74d7a;
+    --blue-50: #eff6fd;
+    --blue-100: #c9e3f8;
+    --blue-200: #93c6f0;
+    --blue-400: #4a9fd4;
+    --blue-600: #2277b0;
+    --gray-50: #f8f9fa;
+    --gray-100: #e9ecef;
+    --gray-200: #dee2e6;
+    --gray-400: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-800: #343a40;
+    --white: #ffffff;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --shadow-sm: 0 2px 8px rgba(200,100,150,0.08);
+    --shadow-md: 0 4px 20px rgba(200,100,150,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #fdf0f5 0%, #eff6fd 100%);
+    min-height: 100vh;
+    color: var(--gray-800);
+  }
+  .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    background: var(--white);
+    border-right: 1.5px solid var(--pink-100);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--pink-100);
+  }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--pink-600);
+    font-weight: 700;
+  }
+  .logo-sub { font-size: 11px; color: var(--gray-400); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+  .nav-section-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray-400); padding: 12px 20px 4px; font-weight: 600; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    font-size: 14px; font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: var(--pink-50); color: var(--pink-600); }
+  .nav-item.active { background: var(--pink-50); color: var(--pink-600); border-left-color: var(--pink-600); font-weight: 700; }
+  .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--pink-100);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink-200), var(--blue-200));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--pink-600);
+  }
+  .user-info { flex: 1; }
+  .user-name { font-size: 13px; font-weight: 700; }
+  .user-role { font-size: 11px; color: var(--gray-400); }
+  .logout-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--gray-400); padding: 4px;
+    border-radius: 6px; transition: all 0.15s;
+  }
+  .logout-btn:hover { background: var(--pink-50); color: var(--pink-600); }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 28px;
+    min-height: 100vh;
+  }
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700;
+    color: var(--gray-800);
+  }
+  .page-subtitle { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--pink-100);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* STATS GRID */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--pink-100);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 10px;
+  }
+  .stat-icon.pink { background: var(--pink-100); }
+  .stat-icon.blue { background: var(--blue-100); }
+  .stat-value { font-size: 24px; font-weight: 800; color: var(--gray-800); }
+  .stat-label { font-size: 12px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
+  .stat-trend { font-size: 11px; margin-top: 6px; font-weight: 600; }
+  .stat-trend.up { color: var(--success); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .col-span-2 { grid-column: span 2; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--pink-400); color: var(--white); }
+  .btn-primary:hover { background: var(--pink-600); }
+  .btn-secondary { background: var(--blue-100); color: var(--blue-600); }
+  .btn-secondary:hover { background: var(--blue-200); }
+  .btn-outline { background: var(--white); color: var(--pink-600); border: 1.5px solid var(--pink-200); }
+  .btn-outline:hover { background: var(--pink-50); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-danger { background: #fff0f0; color: var(--danger); border: 1px solid #ffc9c9; }
+  .btn-success { background: #f0fff4; color: var(--success); border: 1px solid #b2f5cb; }
+
+  /* BADGE */
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .badge-pending { background: #fff8e1; color: #f57f17; }
+  .badge-preparing { background: var(--blue-100); color: var(--blue-600); }
+  .badge-ready { background: #e8f5e9; color: #2e7d32; }
+  .badge-delivered { background: var(--pink-100); color: var(--pink-600); }
+  .badge-paid { background: #e8f5e9; color: #2e7d32; }
+  .badge-unpaid { background: #fff8e1; color: #f57f17; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gray-400); background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--gray-100); color: var(--gray-800); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--pink-50); }
+
+  /* FORM ELEMENTS */
+  input[type=text], input[type=email], input[type=number], input[type=password], select, textarea {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 500;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px; width: 100%;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--pink-400); }
+  label { font-size: 12px; font-weight: 700; color: var(--gray-600); margin-bottom: 5px; display: block; }
+  .form-group { margin-bottom: 14px; }
+
+  /* MENU CARDS */
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .menu-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--pink-100); overflow: hidden;
+    transition: box-shadow 0.15s, transform 0.15s;
+    cursor: pointer;
+  }
+  .menu-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .menu-img {
+    height: 110px; display: flex; align-items: center; justify-content: center;
+    font-size: 52px; background: linear-gradient(135deg, var(--pink-50), var(--blue-50));
+  }
+  .menu-info { padding: 12px; }
+  .menu-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .menu-desc { font-size: 11px; color: var(--gray-400); margin-bottom: 8px; }
+  .menu-footer { display: flex; align-items: center; justify-content: space-between; }
+  .menu-price { font-size: 16px; font-weight: 800; color: var(--pink-600); }
+  .add-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--pink-400); color: white; border: none;
+    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: var(--pink-600); }
+
+  /* CART */
+  .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--pink-100); }
+  .cart-item:last-of-type { border-bottom: none; }
+  .cart-item-name { font-size: 13px; font-weight: 600; }
+  .cart-item-price { font-size: 13px; color: var(--pink-600); font-weight: 700; }
+  .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+  .qty-btn {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--pink-100); color: var(--pink-600); border: none;
+    font-size: 14px; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .qty-num { font-size: 13px; font-weight: 700; min-width: 20px; text-align: center; }
+  .cart-total { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 2px solid var(--pink-100); font-weight: 800; font-size: 16px; }
+
+  /* ORDER TRACKER */
+  .tracker-steps { display: flex; flex-direction: column; gap: 0; }
+  .tracker-step { display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; }
+  .step-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--gray-200);
+    background: var(--white); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--gray-400); flex-shrink: 0; z-index: 1;
+  }
+  .step-dot.done { background: var(--pink-400); border-color: var(--pink-400); color: white; }
+  .step-dot.active { background: var(--blue-400); border-color: var(--blue-400); color: white; box-shadow: 0 0 0 4px var(--blue-100); }
+  .step-line { width: 2px; flex: 1; background: var(--gray-200); min-height: 24px; }
+  .step-line.done { background: var(--pink-200); }
+  .step-content { flex: 1; padding-bottom: 16px; }
+  .step-label { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .step-label.done { color: var(--pink-600); }
+  .step-label.active { color: var(--blue-600); }
+  .step-time { font-size: 11px; color: var(--gray-400); }
+
+  /* PAGE VISIBILITY */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* LOGIN */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #fdf0f5 0%, #eff6fd 100%);
+  }
+  .login-card {
+    background: var(--white); border-radius: 20px;
+    border: 1px solid var(--pink-100); padding: 40px;
+    width: 380px; box-shadow: 0 8px 40px rgba(200,100,150,0.12);
+  }
+  .login-logo { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--pink-600); font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .login-tagline { text-align: center; font-size: 13px; color: var(--gray-400); margin-bottom: 28px; }
+  .role-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+  .role-tab {
+    flex: 1; padding: 9px; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; border: 1.5px solid var(--gray-200);
+    background: var(--white); color: var(--gray-600); transition: all 0.15s;
+  }
+  .role-tab.active { border-color: var(--pink-400); background: var(--pink-50); color: var(--pink-600); }
+  .login-btn {
+    width: 100%; padding: 12px; border-radius: var(--radius-sm);
+    background: var(--pink-400); color: white; border: none;
+    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+    cursor: pointer; margin-top: 8px; transition: background 0.15s;
+  }
+  .login-btn:hover { background: var(--pink-600); }
+
+  /* NOTIFICATION DOT */
+  .notif-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--pink-600);
+    display: inline-block; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); border: 1.5px solid var(--pink-100);
+    border-radius: 24px; padding: 7px 14px;
+    font-size: 13px; color: var(--gray-400);
+    min-width: 200px;
+  }
+  .search-bar input {
+    border: none; outline: none; font-family: 'Nunito', sans-serif;
+    font-size: 13px; color: var(--gray-800); width: 140px; padding: 0;
+  }
+
+  /* SECTION DIVIDER */
+  .section-gap { height: 20px; }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white); border-radius: 18px;
+    padding: 28px; width: 420px; max-width: 90vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; font-family: 'Playfair Display', serif; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    background: var(--gray-800); color: white; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px; font-weight: 600;
+    display: none; align-items: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .toast.show { display: flex; }
+
+  .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .tag-blue { background: var(--blue-100); color: var(--blue-600); }
+  .tag-pink { background: var(--pink-100); color: var(--pink-600); }
+
+  .divider { border: none; border-top: 1px solid var(--gray-100); margin: 14px 0; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .menu-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN PAGE ===================== -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">🍽️ Mister C</div>
+    <div class="login-tagline">Restaurant Ordering System</div>
+    <div class="role-tabs">
+      <button class="role-tab active" id="tabCustomer" onclick="selectRole('customer')">👤 Customer</button>
+      <button class="role-tab" id="tabAdmin" onclick="selectRole('admin')">🛡️ Admin</button>
+    </div>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="loginName" placeholder="e.g. Jhenny Ann" value="Jhenny Ann">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" value="1234">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+<div id="appShell" class="app" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">🍽️ Mister C</div>
+      <div class="logo-sub">Restaurant System</div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="sidebar-footer">
+      <div class="user-avatar" id="avatarEl"></div>
+      <div class="user-info">
+        <div class="user-name" id="footerName"></div>
+        <div class="user-role" id="footerRole"></div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()" title="Logout">⬅</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ===== CUSTOMER PAGES ===== -->
+
+    <!-- Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Good day! 🌸</div>
+          <div class="page-subtitle" id="dashGreeting">Welcome back</div>
+        </div>
+        <div class="header-actions">
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search menu..."></div>
+          <button class="btn btn-primary" onclick="navigate('browse')">+ New Order</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon pink">🛒</div>
+          <div class="stat-value">3</div>
+          <div class="stat-label">Orders This Month</div>
+          <div class="stat-trend up">↑ Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⏳</div>
+          <div class="stat-value">1</div>
+          <div class="stat-label">Pending Order</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pink">💳</div>
+          <div class="stat-value">₱580</div>
+          <div class="stat-label">Total Spent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⭐</div>
+          <div class="stat-value">Gold</div>
+          <div class="stat-label">Loyalty Tier</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🕐 Recent Orders</div>
+          <table>
+            <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#1001</td><td>Burger, Fries</td><td>₱250</td><td><span class="badge badge-preparing">Preparing</span></td></tr>
+              <tr><td>#998</td><td>Pasta, Juice</td><td>₱190</td><td><span class="badge badge-delivered">Delivered</span></td></tr>
+              <tr><td>#991</td><td>Pizza</td><td>₱140</td><td><span class="badge badge-delivered">Delivered</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">🏆 Favorite Items</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:28px;">🍔</span>
+              <div><div style="font-weight:700;font-size:13px;">Classic Burger</div><div style="font-size:11px;color:var(--gray-400);">Ordered 4 times</div></div>
+              <div style="margin-left:auto;font-weight:800;color:var(--pink-600);">₱130</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:28px;">🍕</span>
+              <div><div style="font-weight:700;font-size:13px;">Pepperoni Pizza</div><div style="font-size:11px;color:var(--gray-400);">Ordered 2 times</div></div>
+              <div style="margin-left:auto;font-weight:800;color:var(--pink-600);">₱140</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:28px;">🥤</span>
+              <div><div style="font-weight:700;font-size:13px;">Mango Shake</div><div style="font-size:11px;color:var(--gray-400);">Ordered 3 times</div></div>
+              <div style="margin-left:auto;font-weight:800;color:var(--pink-600);">₱60</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Browse Menu -->
+    <div class="page" id="page-browse">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Browse Menu 🍽️</div>
+          <div class="page-subtitle">Pick your favorites</div>
+        </div>
+        <button class="btn btn-primary" onclick="navigate('cart')">🛒 View Cart (<span id="cartCount">0</span>)</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm">All</button>
+        <button class="btn btn-outline btn-sm">🍔 Burgers</button>
+        <button class="btn btn-outline btn-sm">🍕 Pizza</button>
+        <button class="btn btn-outline btn-sm">🍝 Pasta</button>
+        <button class="btn btn-outline btn-sm">🥤 Drinks</button>
+        <button class="btn btn-outline btn-sm">🍨 Desserts</button>
+      </div>
+      <div class="menu-grid" id="menuGrid"></div>
+    </div>
+
+    <!-- Cart / Place Order -->
+    <div class="page" id="page-cart">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Your Cart 🛒</div>
+          <div class="page-subtitle">Review and place your order</div>
+        </div>
+        <button class="btn btn-outline" onclick="navigate('browse')">← Back to Menu</button>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🛒 Order Items</div>
+          <div id="cartItems"><div style="color:var(--gray-400);font-size:13px;text-align:center;padding:24px;">Your cart is empty. <a href="#" onclick="navigate('browse')" style="color:var(--pink-600);">Browse menu →</a></div></div>
+          <div class="cart-total" id="cartTotal" style="display:none;">
+            <span>Total</span><span id="totalVal" style="color:var(--pink-600);">₱0</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Order Details</div>
+          <div class="form-group">
+            <label>Delivery Option</label>
+            <select><option>Dine In</option><option>Take Out</option><option>Delivery</option></select>
+          </div>
+          <div class="form-group">
+            <label>Table / Address</label>
+            <input type="text" placeholder="e.g. Table 3 or Delivery address">
+          </div>
+          <div class="form-group">
+            <label>Special Instructions</label>
+            <textarea rows="3" placeholder="Allergy notes, preferences..."></textarea>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="placeOrder()">✅ Place Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track Order -->
+    <div class="page" id="page-track">
+      <div class="page-header">
+        <div><div class="page-title">Track Order 📍</div><div class="page-subtitle">Order #1001</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📍 Order Status</div>
+          <div class="tracker-steps">
+            <div class="tracker-step">
+              <div class="step-dot-wrap"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
+              <div class="step-content"><div class="step-label done">Order Placed</div><div class="step-time">2:30 PM</div></div>
+            </div>
+            <div class="tracker-step">
+              <div class="step-dot-wrap"><div class="step-dot done">✓</div><div class="step-line done"></div></div>
+              <div class="step-content"><div class="step-label done">Order Confirmed</div><div class="step-time">2:32 PM</div></div>
+            </div>
+            <div class="tracker-step">
+              <div class="step-dot-wrap"><div class="step-dot active">⚡</div><div class="step-line"></div></div>
+              <div class="step-content"><div class="step-label active">Preparing Your Food</div><div class="step-time">Est. 15 mins</div></div>
+            </div>
+            <div class="tracker-step">
+              <div class="step-dot-wrap"><div class="step-dot">4</div><div class="step-line"></div></div>
+              <div class="step-content"><div class="step-label">Ready for Pickup</div><div class="step-time">—</div></div>
+            </div>
+            <div class="tracker-step">
+              <div class="step-dot-wrap"><div class="step-dot">5</div></div>
+              <div class="step-content"><div class="step-label">Delivered</div><div class="step-time">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🧾 Order Summary</div>
+          <table>
+            <tbody>
+              <tr><td>Classic Burger x1</td><td style="text-align:right;font-weight:700;">₱130</td></tr>
+              <tr><td>Mango Shake x2</td><td style="text-align:right;font-weight:700;">₱120</td></tr>
+              <tr><td style="color:var(--gray-400);">Subtotal</td><td style="text-align:right;color:var(--gray-400);">₱250</td></tr>
+            </tbody>
+          </table>
+          <div class="cart-total"><span>Total</span><span style="color:var(--pink-600);">₱250</span></div>
+          <div style="margin-top:14px;">
+            <span class="badge badge-preparing" style="font-size:12px;padding:5px 14px;">🔵 Preparing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="page" id="page-payment">
+      <div class="page-header">
+        <div><div class="page-title">Make Payment 💳</div><div class="page-subtitle">Secure checkout</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">💳 Payment Method</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px;border:1.5px solid var(--pink-200);border-radius:var(--radius-sm);background:var(--pink-50);">
+              <input type="radio" name="pay" checked> <span style="font-size:18px;">💵</span> <span style="font-weight:700;font-size:13px;">Cash on Delivery</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);">
+              <input type="radio" name="pay"> <span style="font-size:18px;">📱</span> <span style="font-weight:700;font-size:13px;">GCash</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);">
+              <input type="radio" name="pay"> <span style="font-size:18px;">💳</span> <span style="font-weight:700;font-size:13px;">Credit / Debit Card</span>
+            </label>
+          </div>
+          <button class="btn btn-primary" style="width:100%;font-size:15px;padding:13px;" onclick="showToast('✅ Payment successful! Order #1001')">Pay ₱250 Now</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🧾 Order #1001</div>
+          <table>
+            <tbody>
+              <tr><td>Classic Burger x1</td><td style="text-align:right;">₱130</td></tr>
+              <tr><td>Mango Shake x2</td><td style="text-align:right;">₱120</td></tr>
+              <tr><td style="color:var(--gray-400);">Service Fee</td><td style="text-align:right;color:var(--gray-400);">₱0</td></tr>
+            </tbody>
+          </table>
+          <div class="cart-total"><span>Total</span><span style="color:var(--pink-600);">₱250</span></div>
+          <div style="margin-top:14px;padding:10px;background:var(--blue-50);border-radius:var(--radius-sm);font-size:12px;color:var(--blue-600);">
+            🔒 All transactions are encrypted and secure.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order History -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <div><div class="page-title">Order History 📋</div><div class="page-subtitle">All your past orders</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 My Orders</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th></tr></thead>
+            <tbody>
+              <tr><td>#1001</td><td>May 17, 2026</td><td>Burger, Shake x2</td><td>₱250</td><td><span class="badge badge-preparing">Preparing</span></td><td><span class="badge badge-unpaid">Unpaid</span></td></tr>
+              <tr><td>#998</td><td>May 15, 2026</td><td>Pasta, Orange Juice</td><td>₱190</td><td><span class="badge badge-delivered">Delivered</span></td><td><span class="badge badge-paid">Paid</span></td></tr>
+              <tr><td>#991</td><td>May 10, 2026</td><td>Pepperoni Pizza</td><td>₱140</td><td><span class="badge badge-delivered">Delivered</span></td><td><span class="badge badge-paid">Paid</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN PAGES ===== -->
+
+    <!-- Admin Dashboard -->
+    <div class="page" id="page-admin-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Admin Dashboard 📊</div><div class="page-subtitle">Today's overview — May 17, 2026</div></div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="navigate('admin-reports')">📈 View Reports</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon pink">🧾</div>
+          <div class="stat-value">24</div>
+          <div class="stat-label">Orders Today</div>
+          <div class="stat-trend up">↑ +8 vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">💰</div>
+          <div class="stat-value">₱5,840</div>
+          <div class="stat-label">Revenue Today</div>
+          <div class="stat-trend up">↑ +12%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pink">👥</div>
+          <div class="stat-value">18</div>
+          <div class="stat-label">Active Customers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⚡</div>
+          <div class="stat-value">5</div>
+          <div class="stat-label">Pending Orders</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">⚡ Live Orders</div>
+          <table>
+            <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>#1001</td><td>Jhenny</td><td>Burger, Shake</td><td><span class="badge badge-preparing">Preparing</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('Order #1001 marked Ready!')">Mark Ready</button></td></tr>
+              <tr><td>#1002</td><td>Maria</td><td>Pizza x2</td><td><span class="badge badge-pending">Pending</span></td><td><button class="btn btn-secondary btn-sm" onclick="showToast('Order #1002 accepted!')">Accept</button></td></tr>
+              <tr><td>#1003</td><td>Gina</td><td>Pasta, Juice</td><td><span class="badge badge-ready">Ready</span></td><td><button class="btn btn-primary btn-sm" onclick="showToast('Order #1003 delivered!')">Deliver</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">🍽️ Top Selling Items</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">🍔</span><div style="flex:1;"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">Classic Burger</div><div style="height:6px;border-radius:3px;background:var(--gray-100);"><div style="height:100%;width:85%;background:var(--pink-400);border-radius:3px;"></div></div></div><span style="font-weight:800;font-size:13px;color:var(--pink-600);min-width:28px;">85</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">🍕</span><div style="flex:1;"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">Pepperoni Pizza</div><div style="height:6px;border-radius:3px;background:var(--gray-100);"><div style="height:100%;width:64%;background:var(--blue-400);border-radius:3px;"></div></div></div><span style="font-weight:800;font-size:13px;color:var(--blue-600);min-width:28px;">64</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">🥤</span><div style="flex:1;"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">Mango Shake</div><div style="height:6px;border-radius:3px;background:var(--gray-100);"><div style="height:100%;width:52%;background:var(--pink-200);border-radius:3px;"></div></div></div><span style="font-weight:800;font-size:13px;color:var(--pink-400);min-width:28px;">52</span></div>
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">🍝</span><div style="flex:1;"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">Spaghetti</div><div style="height:6px;border-radius:3px;background:var(--gray-100);"><div style="height:100%;width:38%;background:var(--blue-200);border-radius:3px;"></div></div></div><span style="font-weight:800;font-size:13px;color:var(--blue-400);min-width:28px;">38</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin - Manage Menu -->
+    <div class="page" id="page-admin-menu">
+      <div class="page-header">
+        <div><div class="page-title">Manage Menu 🍽️</div><div class="page-subtitle">Add, edit, or remove menu items</div></div>
+        <button class="btn btn-primary" onclick="openAddMenu()">+ Add Item</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="menuAdminTable">
+            <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead>
+            <tbody id="menuAdminBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin - Manage Orders -->
+    <div class="page" id="page-admin-orders">
+      <div class="page-header">
+        <div><div class="page-title">Manage Orders 🧾</div><div class="page-subtitle">All orders in the system</div></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>#1001</td><td>Jhenny Ann</td><td>May 17</td><td>Burger, Shake x2</td><td>₱250</td><td><span class="badge badge-preparing">Preparing</span></td><td><span class="badge badge-unpaid">Unpaid</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('Updated!')">Update</button></td></tr>
+              <tr><td>#1002</td><td>Maria S.</td><td>May 17</td><td>Pizza x2</td><td>₱280</td><td><span class="badge badge-pending">Pending</span></td><td><span class="badge badge-unpaid">Unpaid</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('Updated!')">Update</button></td></tr>
+              <tr><td>#998</td><td>Gina R.</td><td>May 15</td><td>Pasta, OJ</td><td>₱190</td><td><span class="badge badge-delivered">Delivered</span></td><td><span class="badge badge-paid">Paid</span></td><td>—</td></tr>
+              <tr><td>#995</td><td>Luis B.</td><td>May 14</td><td>Burger x3</td><td>₱390</td><td><span class="badge badge-delivered">Delivered</span></td><td><span class="badge badge-paid">Paid</span></td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin - Manage Customers -->
+    <div class="page" id="page-admin-customers">
+      <div class="page-header">
+        <div><div class="page-title">Manage Customers 👥</div><div class="page-subtitle">Customer accounts and info</div></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Orders</th><th>Total Spent</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>C-001</td><td>Jhenny Ann Bayot</td><td>09XX-XXX-0001</td><td>3</td><td>₱580</td><td><span class="badge badge-ready">Active</span></td></tr>
+              <tr><td>C-002</td><td>Maria Santos</td><td>09XX-XXX-0002</td><td>7</td><td>₱1,240</td><td><span class="badge badge-ready">Active</span></td></tr>
+              <tr><td>C-003</td><td>Gina Reyes</td><td>09XX-XXX-0003</td><td>2</td><td>₱330</td><td><span class="badge badge-ready">Active</span></td></tr>
+              <tr><td>C-004</td><td>Luis Buenaventura</td><td>09XX-XXX-0004</td><td>5</td><td>₱890</td><td><span class="badge badge-pending">Inactive</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin - Sales Reports -->
+    <div class="page" id="page-admin-reports">
+      <div class="page-header">
+        <div><div class="page-title">Sales Reports 📈</div><div class="page-subtitle">Revenue and analytics</div></div>
+        <button class="btn btn-secondary">⬇ Export CSV</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon pink">💰</div><div class="stat-value">₱28,450</div><div class="stat-label">Monthly Revenue</div><div class="stat-trend up">↑ +18%</div></div>
+        <div class="stat-card"><div class="stat-icon blue">🧾</div><div class="stat-value">112</div><div class="stat-label">Total Orders</div><div class="stat-trend up">↑ +22 orders</div></div>
+        <div class="stat-card"><div class="stat-icon pink">👥</div><div class="stat-value">48</div><div class="stat-label">Unique Customers</div></div>
+        <div class="stat-card"><div class="stat-icon blue">🍔</div><div class="stat-value">₱254</div><div class="stat-label">Avg Order Value</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 Weekly Sales (May 2026)</div>
+        <div style="display:flex;align-items:flex-end;gap:12px;height:140px;padding:10px 0 0;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--pink-600);">₱3.2K</span>
+            <div style="width:100%;background:var(--pink-200);border-radius:6px 6px 0 0;height:80px;"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Mon</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--pink-600);">₱4.1K</span>
+            <div style="width:100%;background:var(--pink-300,#f0a0c0);border-radius:6px 6px 0 0;height:100px;background:var(--pink-400);"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Tue</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--pink-600);">₱3.8K</span>
+            <div style="width:100%;background:var(--pink-200);border-radius:6px 6px 0 0;height:90px;"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Wed</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--blue-600);">₱5.0K</span>
+            <div style="width:100%;background:var(--blue-400);border-radius:6px 6px 0 0;height:120px;"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Thu</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--blue-600);">₱6.2K</span>
+            <div style="width:100%;background:var(--blue-200);border-radius:6px 6px 0 0;height:140px;background:var(--blue-400);"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Fri</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--pink-600);">₱4.5K</span>
+            <div style="width:100%;background:var(--pink-400);border-radius:6px 6px 0 0;height:108px;"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Sat</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:11px;font-weight:700;color:var(--blue-600);">₱5.8K</span>
+            <div style="width:100%;background:var(--blue-400);border-radius:6px 6px 0 0;height:130px;"></div>
+            <span style="font-size:10px;color:var(--gray-400);">Sun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD MENU MODAL -->
+<div class="modal-overlay" id="addMenuModal">
+  <div class="modal">
+    <div class="modal-title">Add Menu Item</div>
+    <div class="form-group"><label>Item Name</label><input type="text" id="newItemName" placeholder="e.g. BBQ Burger"></div>
+    <div class="form-group"><label>Category</label>
+      <select id="newItemCat"><option>🍔 Burgers</option><option>🍕 Pizza</option><option>🍝 Pasta</option><option>🥤 Drinks</option><option>🍨 Desserts</option></select>
+    </div>
+    <div class="form-group"><label>Price (₱)</label><input type="number" id="newItemPrice" placeholder="0"></div>
+    <div class="form-group"><label>Emoji / Icon</label><input type="text" id="newItemEmoji" placeholder="e.g. 🍔" maxlength="4"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addMenuItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ===================== DATA =====================
+let currentRole = 'customer';
+let currentUser = '';
+let cart = {};
+let menuItems = [
+  { id:1, name:'Classic Burger', cat:'🍔 Burgers', price:130, emoji:'🍔', desc:'Juicy beef patty with fresh veggies', avail:true },
+  { id:2, name:'BBQ Chicken Burger', cat:'🍔 Burgers', price:150, emoji:'🐔', desc:'Smoky BBQ sauce with crispy chicken', avail:true },
+  { id:3, name:'Pepperoni Pizza', cat:'🍕 Pizza', price:140, emoji:'🍕', desc:'Classic pizza loaded with pepperoni', avail:true },
+  { id:4, name:'Spaghetti Bolognese', cat:'🍝 Pasta', price:110, emoji:'🍝', desc:'Rich tomato meat sauce', avail:true },
+  { id:5, name:'Mango Shake', cat:'🥤 Drinks', price:60, emoji:'🥭', desc:'Fresh blended mango', avail:true },
+  { id:6, name:'Chocolate Ice Cream', cat:'🍨 Desserts', price:70, emoji:'🍫', desc:'Creamy chocolate scoop', avail:true },
+];
+
+// ===================== LOGIN =====================
+function selectRole(role) {
+  currentRole = role;
+  document.getElementById('tabCustomer').classList.toggle('active', role==='customer');
+  document.getElementById('tabAdmin').classList.toggle('active', role==='admin');
+}
+
+function doLogin() {
+  currentUser = document.getElementById('loginName').value || 'User';
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appShell').style.display = 'flex';
+  setupNav();
+  renderMenuGrid();
+  renderMenuAdmin();
+  navigate(currentRole==='admin' ? 'admin-dashboard' : 'dashboard');
+  document.getElementById('footerName').textContent = currentUser;
+  document.getElementById('footerRole').textContent = currentRole==='admin' ? 'Administrator' : 'Customer';
+  document.getElementById('avatarEl').textContent = currentUser.charAt(0).toUpperCase();
+  document.getElementById('dashGreeting').textContent = 'Welcome back, ' + currentUser + '!';
+}
+
+function doLogout() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  cart = {};
+  updateCartCount();
+}
+
+// ===================== NAVIGATION =====================
+const customerNav = [
+  { label:'Dashboard', icon:'🏠', page:'dashboard' },
+  { label:'Browse Menu', icon:'🍽️', page:'browse' },
+  { label:'My Cart', icon:'🛒', page:'cart' },
+  { label:'Track Order', icon:'📍', page:'track' },
+  { label:'Make Payment', icon:'💳', page:'payment' },
+  { label:'Order History', icon:'📋', page:'history' },
+];
+const adminNav = [
+  { label:'Dashboard', icon:'📊', page:'admin-dashboard' },
+  { label:'Manage Menu', icon:'🍽️', page:'admin-menu' },
+  { label:'Manage Orders', icon:'🧾', page:'admin-orders' },
+  { label:'Manage Customers', icon:'👥', page:'admin-customers' },
+  { label:'Sales Reports', icon:'📈', page:'admin-reports' },
+];
+
+function setupNav() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  const items = currentRole==='admin' ? adminNav : customerNav;
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.id = 'nav-' + item.page;
+    el.innerHTML = `<span class="nav-icon">${item.icon}</span>${item.label}`;
+    el.onclick = () => navigate(item.page);
+    nav.appendChild(el);
+  });
+}
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+}
+
+// ===================== MENU =====================
+function renderMenuGrid() {
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = menuItems.map(item => `
+    <div class="menu-card">
+      <div class="menu-img">${item.emoji}</div>
+      <div class="menu-info">
+        <div class="menu-name">${item.name}</div>
+        <div class="menu-desc">${item.desc}</div>
+        <div class="menu-footer">
+          <div class="menu-price">₱${item.price}</div>
+          <button class="add-btn" onclick="addToCart(${item.id})">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMenuAdmin() {
+  const body = document.getElementById('menuAdminBody');
+  if (!body) return;
+  body.innerHTML = menuItems.map(item => `
+    <tr>
+      <td><span style="font-size:20px;margin-right:6px;">${item.emoji}</span>${item.name}</td>
+      <td>${item.cat}</td>
+      <td style="font-weight:700;color:var(--pink-600);">₱${item.price}</td>
+      <td><span class="badge ${item.avail ? 'badge-ready' : 'badge-pending'}">${item.avail ? 'Available' : 'Unavailable'}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="showToast('Edit feature coming soon!')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="removeMenuItem(${item.id})">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ===================== CART =====================
+function addToCart(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  updateCartCount();
+  showToast('Added to cart! 🛒');
+}
+
+function updateCartCount() {
+  const total = Object.values(cart).reduce((s,v) => s+v, 0);
+  const el = document.getElementById('cartCount');
+  if (el) el.textContent = total;
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  const totalValEl = document.getElementById('totalVal');
+  if (!container) return;
+  const ids = Object.keys(cart).filter(k => cart[k] > 0);
+  if (ids.length === 0) {
+    container.innerHTML = '<div style="color:var(--gray-400);font-size:13px;text-align:center;padding:24px;">Your cart is empty. <a href="#" onclick="navigate(\'browse\')" style="color:var(--pink-600);">Browse menu →</a></div>';
+    if (totalEl) totalEl.style.display = 'none';
+    return;
+  }
+  let total = 0;
+  container.innerHTML = ids.map(id => {
+    const item = menuItems.find(m => m.id == id);
+    if (!item) return '';
+    const sub = item.price * cart[id];
+    total += sub;
+    return `
+      <div class="cart-item">
+        <div><span style="font-size:18px;margin-right:6px;">${item.emoji}</span><span class="cart-item-name">${item.name}</span></div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+            <span class="qty-num">${cart[id]}</span>
+            <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+          </div>
+          <span class="cart-item-price">₱${sub}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  if (totalEl) totalEl.style.display = 'flex';
+  if (totalValEl) totalValEl.textContent = '₱' + total;
+}
+
+function changeQty(id, delta) {
+  cart[id] = (cart[id] || 0) + delta;
+  if (cart[id] <= 0) delete cart[id];
+  updateCartCount();
+}
+
+function placeOrder() {
+  const ids = Object.keys(cart);
+  if (ids.length === 0) { showToast('⚠️ Your cart is empty!'); return; }
+  cart = {};
+  updateCartCount();
+  showToast('✅ Order placed successfully! Order #1004');
+  navigate('track');
+}
+
+// ===================== ADMIN MENU =====================
+function openAddMenu() {
+  document.getElementById('addMenuModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('addMenuModal').classList.remove('open');
+}
+function addMenuItem() {
+  const name = document.getElementById('newItemName').value;
+  const cat = document.getElementById('newItemCat').value;
+  const price = parseInt(document.getElementById('newItemPrice').value) || 0;
+  const emoji = document.getElementById('newItemEmoji').value || '🍽️';
+  if (!name) { showToast('⚠️ Please enter item name'); return; }
+  menuItems.push({ id: Date.now(), name, cat, price, emoji, desc: '', avail: true });
+  renderMenuAdmin();
+  renderMenuGrid();
+  closeModal();
+  showToast('✅ Menu item added!');
+}
+function removeMenuItem(id) {
+  menuItems = menuItems.filter(m => m.id !== id);
+  renderMenuAdmin();
+  renderMenuGrid();
+  showToast('🗑️ Item removed');
+}
+
+// ===================== TOAST =====================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('addMenuModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
